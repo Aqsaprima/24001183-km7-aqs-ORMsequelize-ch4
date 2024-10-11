@@ -1,3 +1,4 @@
+const morgan = require("morgan");
 const express = require("express");
 const usersRoute = require("./routes/usersRoute");
 const carsRoute = require("./routes/carsRoute");
@@ -9,6 +10,27 @@ const port = 3000;
 
 // Reading json from body (client)
 app.use(express.json());
+
+// middleware: logging third party package
+app.use(morgan());
+
+// contoh middleware yang bikin sendiri
+app.use((req, res, next) => {
+  console.log("incoming request ...");
+  next();
+});
+
+// logging basic
+app.use((req, res, next) => {
+  req.requestTime = new Date().toISOString();
+  next();
+});
+
+// logging basic
+app.use((req, res, next) => {
+  req.user = "fsw2";
+  next();
+});
 
 // Health Check
 app.get("/", async (req, res) => {
@@ -36,6 +58,13 @@ app.use("/api/v1/drivers", driverRoutes);
 
 // Middleware to handle page not found
 app.use((req, res, next) => {
+  // console.log("proses kapan request");
+  // console.log(req.requestTime);
+  // console.log("proses siapa yang request");
+  // console.log(req.user);
+  // console.log("proses API apa yang diminta");
+  // console.log(req.originalUrl);
+
   res.status(404).json({
     status: "Failed",
     message: "API not found !",
