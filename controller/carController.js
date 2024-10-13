@@ -1,4 +1,5 @@
 const { Car } = require("../models");
+const imagekit = require("../lib/imagekit");
 
 async function getAllCars(req, res) {
   try {
@@ -136,10 +137,63 @@ async function createCar(req, res) {
   }
 }
 
+async function createCarMultiImage(req, res) {
+  const { plate, model, type, year } = req.body;
+  const files = req.files;
+  console.log(files);
+  let uploadedImages = [];
+
+  for (const file of files) {
+    const split = file.originalname.split(".");
+    const ext = split[split.length - 1];
+    const filename = split[0];
+
+    //upload image ke server
+    const uploadedImage = await imagekit.upload({
+      file: file.buffer,
+      fileName: `Profile-${filename}-${Date.now()}.${ext}`,
+    });
+
+    if (!uploadedImage) {
+      return res.status(400).json({
+        status: "Failed",
+        message: "Failed to add user data because file not define",
+        isSuccess: false,
+        data: null,
+      });
+    }
+    uploadedImages.push(uploadedImage.url);
+  }
+
+  try {
+    const newCar = await Car.create({
+      plate,
+      model,
+      type,
+      year,
+      images: uploadedImages,
+    });
+    res.status(200).json({
+      status: "Success",
+      message: "Ping successfully",
+      isSuccess: true,
+      data: { newCar },
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "500",
+      message: "Failed to get cars data",
+      isSuccess: false,
+      error: error.message,
+    });
+  }
+}
+
 module.exports = {
   createCar,
   getAllCars,
   getCarById,
   deleteCarById,
   updateCar,
+  createCarMultiImage,
 };
