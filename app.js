@@ -4,6 +4,7 @@ const usersRoute = require("./routes/usersRoute");
 const carsRoute = require("./routes/carsRoute");
 const sparepartsRoute = require("./routes/sparepartsRoute");
 const driverRoutes = require("./routes/driverRoute");
+const dashboardRoutes = require("./routes/dashboardRoutes");
 
 const app = express();
 const port = 3000;
@@ -24,6 +25,25 @@ app.use((req, res, next) => {
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
   next();
+});
+
+// middleware yg bisa membuat express aplikasi kita membaca static file
+app.use(express.static(`${__dirname}/public`));
+
+// middleware agar membaca dari form ejs
+app.use(express.urlencoded({ extended: false }));
+
+// panggil template/view engine
+app.set("view engine", "ejs");
+
+app.get("/dashboard/admin/", async (req, res) => {
+  try {
+    res.render("index", {
+      greeting: "Hello world hanya coba coba",
+    });
+  } catch (error) {
+    console.log(error);
+  }
 });
 
 // logging basic
@@ -50,7 +70,10 @@ app.get("/", async (req, res) => {
   }
 });
 
-// Routes
+// Dashboard route
+app.use("/dashboard/admin", dashboardRoutes);
+
+// API Routes
 app.use("/api/v1/users", usersRoute);
 app.use("/api/v1/cars", carsRoute);
 app.use("/api/v1/spareparts", sparepartsRoute);
