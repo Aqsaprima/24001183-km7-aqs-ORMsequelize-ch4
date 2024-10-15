@@ -1,5 +1,9 @@
+// module third party
 const morgan = require("morgan");
 const express = require("express");
+const expressEJSLayout = require("express-ejs-layouts");
+
+// module kita sendiri
 const usersRoute = require("./routes/usersRoute");
 const carsRoute = require("./routes/carsRoute");
 const sparepartsRoute = require("./routes/sparepartsRoute");
@@ -35,6 +39,8 @@ app.use(express.urlencoded({ extended: false }));
 
 // panggil template/view engine
 app.set("view engine", "ejs");
+app.use(expressEJSLayout);
+app.set("layout", "layout");
 
 app.get("/dashboard/admin/", async (req, res) => {
   try {
@@ -81,13 +87,6 @@ app.use("/api/v1/drivers", driverRoutes);
 
 // Middleware to handle page not found
 app.use((req, res, next) => {
-  // console.log("proses kapan request");
-  // console.log(req.requestTime);
-  // console.log("proses siapa yang request");
-  // console.log(req.user);
-  // console.log("proses API apa yang diminta");
-  // console.log(req.originalUrl);
-
   res.status(404).json({
     status: "Failed",
     message: "API not found !",
